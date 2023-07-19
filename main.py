@@ -144,7 +144,6 @@ def player_stats_checker():
 def level_up():
 
     global required_exp
-    required_exp = 10
 
     op_lvl = player.lvl
     op_hp = player.hp
@@ -664,14 +663,14 @@ def start_game():
 
     global player
     global enemy
-    global required_exp
-
-    required_exp = 10
+    
     player = Player()
     enemy = Enemy()
     
     player_creation()
     
+
+required_exp = 10
 
 start_game()
 core_game()
