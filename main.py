@@ -20,7 +20,7 @@ class Player():
         self.location = "UNKNOWN"
         self.weapon = fists
         self.armor = leather_armor
-        self.jcoins = 1000
+        self.jcoins = 0
 
 # ENEMY CLASS ------------------------------------------------------
 
@@ -162,7 +162,6 @@ def level_up():
     player.atk = int(player.atk + random.randint(1,3))
     player.dfs = int(player.dfs + random.randint(1,3))
 
-    clear_screen(0)
     print("------------------------------------------")
     print("                LEVEL UP")
     print("------------------------------------------")
@@ -174,6 +173,15 @@ def level_up():
     print("ATTACK:", op_atk, ">", player.atk)
     print("DEFENSE:", op_dfs, ">", player.dfs)
     print("------------------------------------------")
+
+def money_gain_system():
+    jcoins_earned = 0
+    jcoins_earned += random.randint(10,30) + enemy.lvl
+    player.jcoins += jcoins_earned 
+    ("------------------------------------------")
+    print("YOU EARNED", jcoins_earned, "JCOINS!")
+    print("CURRENT BALANCED:", player.jcoins, "JCOINS!")
+    ("------------------------------------------")
 
 def exp_gain():
 
@@ -556,7 +564,7 @@ def exploring():
     else:
         clear_screen(0)
         print("------------------------------------------")
-        print("You found an item")
+        print("You found an item [not implemented yet]")
         print("------------------------------------------")
         clear_screen(2)
 
@@ -576,7 +584,7 @@ def battle_system():
                 print("------------------------------------------")
                 print(enemy.name, "Has been defeated.")
                 print("------------------------------------------")
-                #money_gain_system()
+                money_gain_system()
                 exp_gain()
                 print("------------------------------------------")
                 input("PRESS ENTER TO CONTINUE!")
