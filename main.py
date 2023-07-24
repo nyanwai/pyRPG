@@ -1,5 +1,6 @@
 import random
 import os
+import sys
 import time
 from termcolor import colored
 
@@ -50,14 +51,16 @@ class Weapon():
     
 # WEAPONS
 
-fists = Weapon("FISTS", 1, -4, 1, 0)
+fists = Weapon("FISTS", 1, -5, 1, 0)
 fists.ow = True
-small_dagger = Weapon("SMALL DAGGER", 3, -3, 1, 45)
+small_dagger = Weapon("SMALL DAGGER", 2, -3, 1, 35)
 small_dagger.ow = False
-iron_sword = Weapon("IRON SWORD", 5, -2, 3, 75)
+iron_sword = Weapon("IRON SWORD", 4, -2, 3, 50)
 iron_sword.ow = False
-wooden_bow = Weapon("WOODEN BOW", 2, 3, 3, 110)
+wooden_bow = Weapon("WOODEN BOW", 2, 2, 3, 75)
 wooden_bow.ow = False
+katana = Weapon("KATANA", 3, -1, 8, 115)
+katana.ow = False
 
 # ARMOR CLASS ------------------------------------------------------
 
@@ -74,10 +77,14 @@ class Armor():
 
 # ARMOR ------------------------------------------------------
 
-leather_armor = Armor("LEATHER ARMOR", 2, 2, 1, 0,)
+leather_armor = Armor("LEATHER ARMOR", 1, 1, 1, 0,)
 leather_armor.ow = True
-iron_armor = Armor("IRON ARMOR", 2, 5, 3, 50)
+iron_armor = Armor("IRON ARMOR", 3, 3, 3, 35)
 iron_armor.ow = False
+duelist_set = Armor("DUELIST SET", 5, 0, 3, 75)
+duelist_set.ow = False
+front_liner = Armor("JUGGERNAUT", 1, 8, 3, 100)
+front_liner.ow = False
 maid_outfit = Armor("MAID OUTFIT", 69, 69, 420, 1337)
 maid_outfit.ow = False
 
@@ -175,7 +182,7 @@ def level_up():
 
 def money_gain_system():
     jcoins_earned = 0
-    jcoins_earned += random.randint(10,30) + enemy.lvl
+    jcoins_earned += random.randint(1,4) + enemy.lvl + enemy.atk + enemy.dfs
     player.jcoins += jcoins_earned 
     ("------------------------------------------")
     print("YOU EARNED", jcoins_earned, "JCOINS!")
@@ -284,6 +291,7 @@ def inventory():
         print(" - WEAPONS INVENTORY (WI)")
         print(" - ARMOR INVENTORY (AI)")
         print(" - USABLE INVENTORY (UI)")
+        print(" - LEAVE INVENTORY (BACK)")
         print("------------------------------------------")
 
         selected_option = input().lower()
@@ -330,7 +338,7 @@ def inventory():
 
                 owned_armor = []
 
-                for armor_instance in [leather_armor, iron_armor, maid_outfit]:
+                for armor_instance in [leather_armor, iron_armor, duelist_set , front_liner ,maid_outfit]:
                     if armor_instance.ow:
                         owned_armor.append(armor_instance)
 
@@ -438,7 +446,7 @@ def handle_weapon_shop():
         print("------------------------------------------")
 
         # List of weapon items in the shop
-        weapon_items = [small_dagger, iron_sword, wooden_bow]
+        weapon_items = [small_dagger, iron_sword, wooden_bow, katana]
 
         for index, weapon in enumerate(weapon_items, start=1):
             if not weapon.ow:  # Only display weapon items that are not owned
@@ -475,7 +483,7 @@ def handle_armor_shop():
         print("------------------------------------------")
 
         # List of armor items in the shop
-        armor_items = [iron_armor, maid_outfit]
+        armor_items = [iron_armor, duelist_set, front_liner ,maid_outfit]
 
         for index, armor in enumerate(armor_items, start=1):
             if not armor.ow:  # Only display armor items that are not owned
@@ -553,7 +561,7 @@ def exploring():
 
     encounter_chance = random.randint(1,5)
 
-    if encounter_chance == 1 or encounter_chance == 2 or encounter_chance == 3 or encounter_chance == 4:
+    if encounter_chance <= 4:
         clear_screen(0)
         print("------------------------------------------")
         print(player.name, "encountered a", enemy.name, "!")
@@ -563,9 +571,21 @@ def exploring():
     else:
         clear_screen(0)
         print("------------------------------------------")
-        print("You found an item [not implemented yet]")
+        item_drop()
         print("------------------------------------------")
         clear_screen(2)
+
+def item_drop():
+
+    chance = random.randint(1,2)
+
+    if chance == 1:
+        small_pot.stock += 1
+        print("You found", small_pot.name)
+    else:
+        elixir.stock += 1
+        print("You found", elixir.name)
+        
 
 def battle_system():
 
@@ -574,7 +594,7 @@ def battle_system():
     
     while True:
 
-        player_input = input("ATTACK / RUN: ").lower()
+        player_input = input("ATTACK / HEAL / RUN: ").lower()
 
         if player_input == "attack":
             clear_screen(0)
@@ -598,6 +618,50 @@ def battle_system():
                     print("------------------------------------------")
                     clear_screen(2)
                     break
+        elif player_input == "heal":    # I know this should have a function instead but im lazy :D
+            while True:
+                print("------------------------------------------")
+                print(colored("CONSUMABLE INVENTORY".center(42), "yellow"))
+                print("------------------------------------------")
+
+                owned_consumables = []
+
+                for consumable_instance in [small_pot, elixir]:
+                    if consumable_instance.stock > 0:
+                        owned_consumables.append(consumable_instance)
+
+                for index, consumable in enumerate(owned_consumables, start=1):
+                    print(f"{index}. {consumable.name} | HP({consumable.hp}) | Stock: x({consumable.stock})")
+                print("------------------------------------------")
+                print("Select a consumable number to use (BACK):")
+                selected_option = input(">> ").lower()
+
+                if selected_option == 'back':
+                    clear_screen(0)
+                    display_opp()
+                    break
+                else:
+                    try:
+                        selected_index = int(selected_option) - 1
+                        if 0 <= selected_index < len(owned_consumables):
+                            selected_consumable = owned_consumables[selected_index]
+                            # Calculate the actual HP to be healed without exceeding the maximum HP
+                            hp_to_heal = min(selected_consumable.hp, updated_hp - player.hp)
+                            # Increase player's HP by the calculated amount
+                            player.hp += hp_to_heal
+                            # Decrease the stock of the consumable by 1
+                            selected_consumable.stock -= 1
+                            if selected_consumable.stock <= 0:
+                                selected_consumable.ow = False
+                                # If the stock is zero, we mark the consumable as not owned ('ow' = False)
+                            print(f"You used {selected_consumable.name} and healed {hp_to_heal} HP.")
+                            time.sleep(2)
+                            clear_screen(0)
+                            enemy_turn()
+                            break
+                    except ValueError:
+                        print("Invalid input. Please select a valid consumable number or 'back' to go back.")
+                        time.sleep(2)
         elif player_input == "run":
             print("You ran away succesfully!")
             clear_screen(2)
@@ -645,6 +709,8 @@ def menu_ui():
             shop()
         elif p_input == "explore":
             exploring()
+        elif p_input == "quit":
+            sys.exit()
 
 def core_game():
 
