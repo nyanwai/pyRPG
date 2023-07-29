@@ -13,6 +13,8 @@ class Player():
         self.name = "PLAYER"
         self.hp = 35
         self.max_hp = 35
+        self.energy = 100
+        self.max_energy = 100
         self.atk = 1
         self.dfs = 1
         self.lvl = 1
@@ -221,10 +223,10 @@ def player_creation():
             player.hp = player.max_hp
         elif p_input == "attack" and skill_p > 0:
             skill_p -= 1
-            player.atk += 3
+            player.atk += 2
         elif p_input == "defense" and skill_p > 0:
             skill_p -= 1
-            player.dfs += 2
+            player.dfs += 1
         else:
             continue
 
@@ -307,7 +309,7 @@ def inventory():
 
                 owned_weapons = []
 
-                for weapon_instance in [fists, small_dagger, iron_sword, wooden_bow]:
+                for weapon_instance in [fists, small_dagger, iron_sword, wooden_bow, katana]:
                     if weapon_instance.ow:
                         owned_weapons.append(weapon_instance)
 
@@ -675,7 +677,7 @@ def battle_system():
 
 def display_opp():
 
-    player_info = f"LVL:{player.lvl}    {player.name:<6s} |  {player.hp} / {updated_hp} HP"
+    player_info = f"LVL:{player.lvl}    {player.name:<6s} |  {player.hp} / {updated_hp} HP | E: {player.energy} / {player.max_energy}"
     enemy_info = f"LVL:{enemy.lvl}    {enemy.name:<6s} |  {enemy.hp} / {enemy.max_hp} HP"
     
     print("------------------------------------------")
@@ -684,8 +686,27 @@ def display_opp():
     print("------------------------------------------")
 
 def player_turn():
-    damage_done = max(1, updated_atk - enemy.dfs)
-    enemy.hp = max(0, enemy.hp - damage_done)
+    
+    while True:
+        clear_screen(0)
+        display_opp()
+        player_input = input("NORMAL ATTACK(NA) / SPECIAL ATTACK (SA): ").lower()
+
+        if player_input == "na":
+            player.energy = min(100, player.energy + 25)
+            damage_done = max(1, updated_atk - enemy.dfs)
+            enemy.hp = max(0, enemy.hp - damage_done)
+            clear_screen(0)
+            break
+        elif player_input == "sa" and player.energy > 0:
+            player.energy -= 50
+            damage_done = max(1, (updated_atk + 3) - enemy.dfs)
+            enemy.hp = max(0, enemy.hp - damage_done)
+            clear_screen(0)
+            break
+
+
+    
     
 
 def enemy_turn():
